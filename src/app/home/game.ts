@@ -4,7 +4,7 @@ const SCALED = 0.15;
 const BLOCK_W = 110;
 const BLOCK_H = 100
 const BLOCK_NUM = 5;
-const START_X = (window.innerWidth/2) + 100;
+const START_X = (window.innerWidth/2) + 150;
 const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
 
@@ -35,6 +35,8 @@ export class GameScene extends Phaser.Scene {
     this.load.setPath('assets/imgs/Breakout_TileSet_Free/PNG/');
     //blue block image
     this.load.image('blueBlock','01-Breakout-Tiles.png');
+    //cracked blue block image
+    this.load.image('crackedBlue','02-Breakout-Tiles.png');
     //ball image
     this.load.image('ball','bomb.png');
     //paddle image
@@ -45,8 +47,9 @@ export class GameScene extends Phaser.Scene {
   create(){
     //add bricks to the game
     this.blocks = this.physics.add.staticGroup();
+
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
       this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();

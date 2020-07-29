@@ -11,6 +11,7 @@ const BALL_START_Y = window.innerHeight + 300;
 export class GameScene extends Phaser.Scene {
 
   private blocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
   private paddle: Phaser.Physics.Arcade.Sprite;
   private balls: Phaser.Physics.Arcade.Group;
   private ball: Phaser.Physics.Arcade.Image;
@@ -47,13 +48,29 @@ export class GameScene extends Phaser.Scene {
   create(){
     //add bricks to the game
     this.blocks = this.physics.add.staticGroup();
+    this.crackedBlocks = this.physics.add.staticGroup();
 
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
     }
+
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+    }
+
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.crackedBlocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + BLOCK_H, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+    }
+    
     for(let i = 0 ; i < BLOCK_NUM ; i++){
       this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
     }
+
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.crackedBlocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+    }
+
+
     for(let i = 0 ; i < BLOCK_NUM ; i++){
       this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + (BLOCK_H*2), 'blueBlock').setScale(SCALED* 1.75).refreshBody();
     }
@@ -72,6 +89,7 @@ export class GameScene extends Phaser.Scene {
     this.ball.setCollideWorldBounds(true);
     this.physics.world.checkCollision.down = false;
     this.physics.add.collider(this.balls, this.blocks, this.hitBlock, null, this);
+    this.physics.add.collider(this.balls, this.crackedBlocks, this.hitBlock, null, this);
     this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
 
     //add all text objects
@@ -195,7 +213,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   isWon(){
-    return this.blocks.countActive() === 0;
+    return this.blocks.countActive() === 0 &&
+           this.crackedBlocks.countActive() ===0;
   }
 
   update() {

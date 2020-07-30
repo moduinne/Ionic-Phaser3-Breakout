@@ -1,0 +1,16 @@
+[
+    {
+        "level" : 1,
+        "rows" : 3,
+        "number" : 3,
+        "blueX": [],
+        "blueY": []
+    },
+    {
+        "level" : 2,
+        "rows" : 1,
+        "number" : 3,
+        "blueX" : [],
+        "blueY" : []
+    }
+]

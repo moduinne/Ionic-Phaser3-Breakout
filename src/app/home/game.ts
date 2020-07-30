@@ -5,7 +5,7 @@ const SCALED = 0.20;
 const BLOCK_W = 150;
 const BLOCK_H = 100;
 const BLOCK_NUM = 3;
-const BLOCK_START_X = (window.innerWidth/2) + 25;//<----------this number is where you finished
+const BLOCK_START_X = (window.innerWidth/2) + 25;//<-helps keep aligned in OPPO phone
 const START_X = (window.innerWidth/2) + 150;
 const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
@@ -158,7 +158,7 @@ export class GameScene extends Phaser.Scene {
     this.playerWonText.setVisible(false);
 
     this.restartButton = this.add.text(this.physics.world.bounds.width / 3,
-        this.physics.world.bounds.height / 2,
+        this.physics.world.bounds.height / 1.5,
         'RESTART', 
       {
         fontFamily: 'Monaco, Courier, monospace',
@@ -304,10 +304,8 @@ export class GameScene extends Phaser.Scene {
       this.gameStarted = false;
       if (this.isGameOver(this.physics.world)) {
         this.physics.pause;
-        //this.gameOverText.setVisible(true);
+        this.gameOverText.setVisible(true);
         this.ball.disableBody(true, true);
-        // this.physics.pause;
-        // this.reBoot();
         this.restartButton.setVisible(true);
       }
       else {

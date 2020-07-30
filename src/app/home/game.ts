@@ -1,15 +1,16 @@
 import * as Phaser from 'phaser';
-const DPR = 2;
-const SCALED = 0.15;
-const BLOCK_W = 110;
-const BLOCK_H = 100
-const BLOCK_NUM = 5;
+
+//GLOBAL CONSTANTS
+const SCALED = 0.20;
+const BLOCK_W = 150;
+const BLOCK_H = 100;
+const BLOCK_NUM = 3;
 const START_X = (window.innerWidth/2) + 150;
 const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
 
 export class GameScene extends Phaser.Scene {
-
+  
   private blocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
   private paddle: Phaser.Physics.Arcade.Sprite;
@@ -30,8 +31,8 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'game' });
   }
 
+  //PRELOAD: PHASER METHOD
   preload() {
-    
     //set path for all 
     this.load.setPath('assets/imgs/Breakout_TileSet_Free/PNG/');
     //blue block image
@@ -42,57 +43,27 @@ export class GameScene extends Phaser.Scene {
     this.load.image('ball','bomb.png');
     //paddle image
     this.load.image('paddle','49-Breakout-Tiles.png');
-
   }
 
+  //CREATE: PHASER METHOD
   create(){
-    //add bricks to the game
-    this.blocks = this.physics.add.staticGroup();
-    this.crackedBlocks = this.physics.add.staticGroup();
+    this.addBlocks();
+    this.addPaddle();
+    this.addBall();
+    this.addColliders();
+    this.addTextObjects();
+    this.addInputCallBacks();
+  }
 
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
-    }
+  addInputCallBacks(){
+    //and the input call back for the paddle
+    this.input.on('pointerdown',this.startDrag, this);
+    //hacky way to get the game to start
+    this.input.once('pointerup', this.start, this);
+  }
 
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,window.innerHeight/5, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
-    }
-
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + BLOCK_H, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
-    }
-    
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
-    }
-
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
-    }
-
-
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/4)+(i*BLOCK_W) ,(window.innerHeight/5) + (BLOCK_H*2), 'blueBlock').setScale(SCALED* 1.75).refreshBody();
-    }
-    
-    //add the paddle to the game
-    this.paddle = this.physics.add.sprite(START_X, PAD_START_Y, 'paddle').setScale(SCALED * 2).refreshBody();
-    this.paddle.setImmovable(true);
-    this.paddle.setCollideWorldBounds(true);
-    this.paddle.setX(this.game.input.activePointer.x);
-    this.paddle.setInteractive();
-
-    //add the ball to the game
-    this.balls = this.physics.add.group();
-    this.ball = this.balls.create(START_X, BALL_START_Y,'ball').setScale(1.5).refreshBody();
-    this.ball.setBounce(1, 1);
-    this.ball.setCollideWorldBounds(true);
-    this.physics.world.checkCollision.down = false;
-    this.physics.add.collider(this.balls, this.blocks, this.hitBlock, null, this);
-    this.physics.add.collider(this.balls, this.crackedBlocks, this.hitBlock, null, this);
-    this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
-
-    //add all text objects
+  //wrapper method for the Text objects of the game
+  addTextObjects(){
     this.gameOverText =this.add.text(
       this.physics.world.bounds.width / 2,
       this.physics.world.bounds.height / 2,
@@ -105,7 +76,6 @@ export class GameScene extends Phaser.Scene {
     );
     this.gameOverText.setOrigin(0.5);
     this.gameOverText.setVisible(false);
-
     this.livesText = this.add.text(this.physics.world.bounds.width - 200 ,50,
       "Lives: " + this.lives,
       {
@@ -114,7 +84,6 @@ export class GameScene extends Phaser.Scene {
         fill: '#fff'
       }
     );
-  
     this.scoreText = this.add.text(20,50,"Score: " + this.score,
       {
         fontFamily: 'Monaco, Courier, monospace',
@@ -122,8 +91,6 @@ export class GameScene extends Phaser.Scene {
         fill: '#fff'
       }
     );
-  
-    //opening text
     this.openingText = this.add.text(this.physics.world.bounds.width / 2,
       this.physics.world.bounds.height / 2,
       'Tap To Start',
@@ -134,8 +101,6 @@ export class GameScene extends Phaser.Scene {
       }
     );
     this.openingText.setOrigin(0.5);
-
-    // Create the game won text
     this.playerWonText = this.add.text(
     this.physics.world.bounds.width / 2,
     this.physics.world.bounds.height / 2,
@@ -148,17 +113,63 @@ export class GameScene extends Phaser.Scene {
   );
     this.playerWonText.setOrigin(0.5);
     this.playerWonText.setVisible(false);
-
-    //and the input call back for the paddle
-    this.input.on('pointerdown',this.startDrag, this);
-    //hacky way to get the game to start
-    this.input.once('pointerup', this.start, this);
   }
 
+  //wrapper method for adding the collider call backs on the other elements of the game
+  addColliders(){
+    this.physics.world.checkCollision.down = false;
+    this.physics.add.collider(this.balls, this.blocks, this.hitBlock, null, this);
+    this.physics.add.collider(this.balls, this.crackedBlocks, this.hitBlock, null, this);
+    this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
+  }
+
+  //wrapper method for creating the ball
+  addBall(){
+    this.balls = this.physics.add.group();
+    this.ball = this.balls.create(START_X, BALL_START_Y,'ball').setScale(1.5).refreshBody();
+    this.ball.setBounce(1, 1);
+    this.ball.setCollideWorldBounds(true);
+  }
+
+  //wrapper method for creating the player/paddle
+  addPaddle(){
+    this.paddle = this.physics.add.sprite(START_X, PAD_START_Y, 'paddle').setScale((SCALED-0.05) * 2).refreshBody();
+    this.paddle.setImmovable(true);
+    this.paddle.setCollideWorldBounds(true);
+    this.paddle.setX(this.game.input.activePointer.x);
+    this.paddle.setInteractive();
+  }
+
+  //wrapper method for creating blocks for the lvl
+  addBlocks(){
+    this.blocks = this.physics.add.staticGroup();
+    this.crackedBlocks = this.physics.add.staticGroup();
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.crackedBlocks.create((window.innerWidth/2)+(i*BLOCK_W) ,window.innerHeight/4, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+    }
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.blocks.create((window.innerWidth/2)+(i*BLOCK_W) ,window.innerHeight/4, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+    }
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.crackedBlocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+    }
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.blocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+    }
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.crackedBlocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+    }
+    for(let i = 0 ; i < BLOCK_NUM ; i++){
+      this.blocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+    }
+  }
+
+  //sets the boolean for game started to true
   start(pointer){
     this.started = true;
   }
 
+  //call back method for the beginning of the dragging on screen
   startDrag(pointer, targets){
     this.input.off('pointerdown',this.startDrag, this);
     this.dragObj = targets[0];
@@ -166,16 +177,19 @@ export class GameScene extends Phaser.Scene {
     this.input.on('pointerup', this.stopDrag, this);
   }
 
+  //call back method for while dragging touch on screen is happening
   doDrag(pointer){ 
     this.dragObj.x = pointer.x;
   }
 
+  //call back for pointer input when drag has stopped
   stopDrag(){
     this.input.on('pointerdown',this.startDrag, this);
     this.input.off('pointermove', this.doDrag, this);
     this.input.off('pointerup', this.stopDrag, this);
   }
 
+  //call back method for collider of ball on paddle
   hitPlayer(){
     // Increase the velocity of the ball after it bounces
     this.ball.setVelocityY(this.ball.body.velocity.y - 5);
@@ -188,6 +202,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  //call back method for collider of ball on block
   hitBlock(ball, block){
     block.disableBody(true, true);
     this.score += 10;
@@ -202,35 +217,36 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  //returns true iff the ball has left the world
   ballIsLost(world){
     return this.ball.y > world.bounds.height;
   }
 
+  //returns true iff lives === 0  and the ball has left the world
   isGameOver(world){
     return this.ball.y > world.bounds.height &&
     this.lives < 0;
-
   }
 
+  //returns true iff all blocks in all lists are equal to zero
   isWon(){
     return this.blocks.countActive() === 0 &&
            this.crackedBlocks.countActive() ===0;
   }
 
+  //UPDATE: PHASER METHOD////////////////////////////////////////////////////////////////////////////////
   update() {
-    if (this.ballIsLost(this.physics.world)){
+    if (this.ballIsLost(this.physics.world)) {
       this.lives -= 1;
       this.gameStarted = false;
-      
-      if(this.isGameOver(this.physics.world)){
+      if (this.isGameOver(this.physics.world)) {
         this.gameOverText.setVisible(true);
         this.ball.disableBody(true, true);
       }
-      else{
+      else {
         this.livesText.setText('Lives: ' + this.lives);
         this.gameStarted = false;
         this.openingText.setVisible(true);
-        
         this.paddle.setPosition(START_X,PAD_START_Y);
         this.ball.setPosition(START_X,BALL_START_Y);
         this.ball.setVelocityX(0);
@@ -247,7 +263,7 @@ export class GameScene extends Phaser.Scene {
       if (!this.gameStarted) {
         this.paddle.setX(START_X);
         this.ball.setX(START_X);
-      if (this.game.input.activePointer.active && this.started){
+      if (this.game.input.activePointer.active && this.started) {
           this.gameStarted = true;
           this.ball.setVelocityY(-600);
           this.ball.setVelocityX((Math.random()*500) + 300);

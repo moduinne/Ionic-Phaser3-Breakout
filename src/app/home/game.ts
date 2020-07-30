@@ -103,7 +103,6 @@ export class GameScene extends Phaser.Scene {
     this.ball_crack_brick_sound = this.sound.add('ballCrackBrickSound');
     this.ball_kill_brick_sound = this.sound.add('ballKillBrickSound');
     this.ball_hit_paddle_sound = this.sound.add('ballHitPaddleSound');
-
   }
 
   //wrapper method for the Text objects of the game
@@ -158,17 +157,34 @@ export class GameScene extends Phaser.Scene {
     this.playerWonText.setOrigin(0.5);
     this.playerWonText.setVisible(false);
 
-    // this.restartButton = this.add.text(this.physics.world.bounds.width / 2,
-    //   this.physics.world.bounds.height / 2,
-    //   'Play Again',
-    //   {
-    //     fontFamily: 'Monaco, Courier, monospace',
-    //     fontSize: '50px',
-    //     fill: '#fff'
-    //   }
-    // );
-    // this.restartButton.setInteractive(true);
-    // this.restartButton.setVisible(false);
+    this.restartButton = this.add.text(this.physics.world.bounds.width / 3,
+        this.physics.world.bounds.height / 2,
+        'RESTART', 
+      {
+        fontFamily: 'Monaco, Courier, monospace',
+        fontSize: '50px',
+        fill: '#fff' 
+      }
+      );
+    this.restartButton.setInteractive();
+    this.restartButton.on('pointerdown',() => {
+      this.reBoot();
+      });
+    this.restartButton.on('pointerdown',() => {
+      this.enterButtonHoverState();
+      });
+    this.restartButton.on('pointerdown',() => {
+      this.enterButtonRestState();
+      });
+    this.restartButton.setVisible(false);
+  }
+
+  enterButtonHoverState() {
+    this.restartButton.setStyle({ fill: '#ff0'});
+  }
+
+  enterButtonRestState() {
+    this.restartButton.setStyle({ fill: '#0f0' });
   }
 
   //wrapper method for adding the collider call backs on the other elements of the game
@@ -287,10 +303,12 @@ export class GameScene extends Phaser.Scene {
       this.lives -= 1;
       this.gameStarted = false;
       if (this.isGameOver(this.physics.world)) {
-        this.gameOverText.setVisible(true);
-        this.ball.disableBody(true, true);
         this.physics.pause;
-        this.reBoot();
+        //this.gameOverText.setVisible(true);
+        this.ball.disableBody(true, true);
+        // this.physics.pause;
+        // this.reBoot();
+        this.restartButton.setVisible(true);
       }
       else {
         this.livesText.setText('Lives: ' + this.lives);
@@ -303,11 +321,12 @@ export class GameScene extends Phaser.Scene {
       }
     }
     else if (this.isWon()) {
+      this.physics.pause;
       this.playerWonText.setVisible(true);
       this.ball.disableBody(true, true);
       this.paddle.disableBody(true,true);
-      this.physics.pause;
-      this.reBoot();
+      // this.physics.pause;
+      this.restartButton.setVisible(true);
       }
     else {
       if (!this.gameStarted) {

@@ -5,6 +5,7 @@ const SCALED = 0.20;
 const BLOCK_W = 150;
 const BLOCK_H = 100;
 const BLOCK_NUM = 3;
+const BLOCK_START_X = (window.innerWidth/2) + 25;//<----------this number is where you finished
 const START_X = (window.innerWidth/2) + 150;
 const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
@@ -30,6 +31,8 @@ export class GameScene extends Phaser.Scene {
   public ball_crack_brick_sound;
   public ball_kill_brick_sound;
   public ball_hit_paddle_sound;
+
+  public restartButton;
 
   constructor() {
     super({ key: 'game' });
@@ -65,6 +68,7 @@ export class GameScene extends Phaser.Scene {
     this.addAudio();
   }
 
+  //add call backs for the inbuilt pointer
   addInputCallBacks(){
     this.input.on('pointerdown',this.startDrag, this);
     this.input.once('pointerup', this.start, this);
@@ -153,6 +157,18 @@ export class GameScene extends Phaser.Scene {
   );
     this.playerWonText.setOrigin(0.5);
     this.playerWonText.setVisible(false);
+
+    // this.restartButton = this.add.text(this.physics.world.bounds.width / 2,
+    //   this.physics.world.bounds.height / 2,
+    //   'Play Again',
+    //   {
+    //     fontFamily: 'Monaco, Courier, monospace',
+    //     fontSize: '50px',
+    //     fill: '#fff'
+    //   }
+    // );
+    // this.restartButton.setInteractive(true);
+    // this.restartButton.setVisible(false);
   }
 
   //wrapper method for adding the collider call backs on the other elements of the game
@@ -185,22 +201,22 @@ export class GameScene extends Phaser.Scene {
     this.blocks = this.physics.add.staticGroup();
     this.crackedBlocks = this.physics.add.staticGroup();
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create((window.innerWidth/2)+(i*BLOCK_W) ,window.innerHeight/4, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/2)+(i*BLOCK_W) ,window.innerHeight/4, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+      this.blocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+      this.blocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create((window.innerWidth/2)+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+      this.blocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'blueBlock').setScale(SCALED* 1.75).refreshBody();
     }
   }
 
@@ -273,6 +289,8 @@ export class GameScene extends Phaser.Scene {
       if (this.isGameOver(this.physics.world)) {
         this.gameOverText.setVisible(true);
         this.ball.disableBody(true, true);
+        this.physics.pause;
+        this.reBoot();
       }
       else {
         this.livesText.setText('Lives: ' + this.lives);
@@ -289,6 +307,7 @@ export class GameScene extends Phaser.Scene {
       this.ball.disableBody(true, true);
       this.paddle.disableBody(true,true);
       this.physics.pause;
+      this.reBoot();
       }
     else {
       if (!this.gameStarted) {
@@ -302,5 +321,13 @@ export class GameScene extends Phaser.Scene {
         }
       }
     }
+  }
+
+  //Method for rebooting the game after winning or losing
+  reBoot(){
+    this.lives = 3;
+    this.started = false;
+    this.gameStarted = false;
+    this.scene.restart();
   }
 }

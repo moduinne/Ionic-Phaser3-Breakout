@@ -10,7 +10,7 @@ const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
 
 export class GameScene extends Phaser.Scene {
-  
+
   private blocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
   private paddle: Phaser.Physics.Arcade.Sprite;
@@ -27,11 +27,15 @@ export class GameScene extends Phaser.Scene {
   public dragObj;
   public started = false;
 
+  public ball_crack_brick_sound;
+  public ball_kill_brick_sound;
+  public ball_hit_paddle_sound;
+
   constructor() {
     super({ key: 'game' });
   }
 
-  //PRELOAD: PHASER METHOD
+  //PRELOAD: PHASER METHOD//////////////////////////////////////////////////////////////////////////////
   preload() {
     //set path for all 
     this.load.setPath('assets/imgs/Breakout_TileSet_Free/PNG/');
@@ -43,9 +47,14 @@ export class GameScene extends Phaser.Scene {
     this.load.image('ball','bomb.png');
     //paddle image
     this.load.image('paddle','49-Breakout-Tiles.png');
+    //audio
+    this.load.setPath('assets/audio/');
+    this.load.audio('ballCrackBrickSound', 'zapsplat_impact_rock_small_hit_solid_ground_004_11181.mp3');
+    this.load.audio('ballKillBrickSound', 'zapsplat_impact_rock_small_hit_solid_ground_001_11178.mp3');
+    this.load.audio('ballHitPaddleSound','tom_chapman_impact_stone_on_frozen_lake_ice_thrown_skim_contact_microphone_002.mp3');
   }
 
-  //CREATE: PHASER METHOD
+  //CREATE: PHASER METHOD///////////////////////////////////////////////////////////////////////////////
   create(){
     this.addBlocks();
     this.addPaddle();
@@ -53,13 +62,44 @@ export class GameScene extends Phaser.Scene {
     this.addColliders();
     this.addTextObjects();
     this.addInputCallBacks();
+    this.addAudio();
   }
 
   addInputCallBacks(){
-    //and the input call back for the paddle
     this.input.on('pointerdown',this.startDrag, this);
-    //hacky way to get the game to start
     this.input.once('pointerup', this.start, this);
+  }
+
+  //sets the boolean for game started to true
+  start(pointer){
+    this.started = true;
+  }
+
+  //call back method for the beginning of the dragging on screen
+  startDrag(pointer, targets){
+    this.input.off('pointerdown',this.startDrag, this);
+    this.dragObj = targets[0];
+    this.input.on('pointermove', this.doDrag, this);
+    this.input.on('pointerup', this.stopDrag, this);
+  }
+
+  //call back method for while dragging touch on screen is happening
+  doDrag(pointer){ 
+    this.dragObj.x = pointer.x;
+  }
+
+  //call back for pointer input when drag has stopped
+  stopDrag(){
+    this.input.on('pointerdown',this.startDrag, this);
+    this.input.off('pointermove', this.doDrag, this);
+    this.input.off('pointerup', this.stopDrag, this);
+  }
+
+  addAudio(){
+    this.ball_crack_brick_sound = this.sound.add('ballCrackBrickSound');
+    this.ball_kill_brick_sound = this.sound.add('ballKillBrickSound');
+    this.ball_hit_paddle_sound = this.sound.add('ballHitPaddleSound');
+
   }
 
   //wrapper method for the Text objects of the game
@@ -118,8 +158,8 @@ export class GameScene extends Phaser.Scene {
   //wrapper method for adding the collider call backs on the other elements of the game
   addColliders(){
     this.physics.world.checkCollision.down = false;
-    this.physics.add.collider(this.balls, this.blocks, this.hitBlock, null, this);
-    this.physics.add.collider(this.balls, this.crackedBlocks, this.hitBlock, null, this);
+    this.physics.add.collider(this.balls, this.blocks, this.hitSolidBlueBlock, null, this);
+    this.physics.add.collider(this.balls, this.crackedBlocks, this.hitCrackedBlueBlock, null, this);
     this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
   }
 
@@ -164,33 +204,9 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  //sets the boolean for game started to true
-  start(pointer){
-    this.started = true;
-  }
-
-  //call back method for the beginning of the dragging on screen
-  startDrag(pointer, targets){
-    this.input.off('pointerdown',this.startDrag, this);
-    this.dragObj = targets[0];
-    this.input.on('pointermove', this.doDrag, this);
-    this.input.on('pointerup', this.stopDrag, this);
-  }
-
-  //call back method for while dragging touch on screen is happening
-  doDrag(pointer){ 
-    this.dragObj.x = pointer.x;
-  }
-
-  //call back for pointer input when drag has stopped
-  stopDrag(){
-    this.input.on('pointerdown',this.startDrag, this);
-    this.input.off('pointermove', this.doDrag, this);
-    this.input.off('pointerup', this.stopDrag, this);
-  }
-
   //call back method for collider of ball on paddle
   hitPlayer(){
+    this.ball_hit_paddle_sound.play();
     // Increase the velocity of the ball after it bounces
     this.ball.setVelocityY(this.ball.body.velocity.y - 5);
     let newXVelocity = Math.abs(this.ball.body.velocity.x) + 5;
@@ -202,11 +218,26 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  //call back method for collider of ball on block
-  hitBlock(ball, block){
+  //call back method for collider of ball on blue block
+  hitCrackedBlueBlock(ball, block){
+    this.ball_kill_brick_sound.play();
     block.disableBody(true, true);
     this.score += 10;
     this.scoreText.setText('Score: ' + this.score);
+    if (ball.body.velocity.x === 0) {
+      let randNum = Math.random();
+      if (randNum >= 0.5) {
+        ball.body.setVelocityX(150);
+      } else {
+        ball.body.setVelocityX(-150);
+      }
+    }
+  }
+
+  //call back method for hitting a solid blue block
+  hitSolidBlueBlock(ball, block){
+    this.ball_crack_brick_sound.play();
+    block.disableBody(true, true);
     if (ball.body.velocity.x === 0) {
       let randNum = Math.random();
       if (randNum >= 0.5) {

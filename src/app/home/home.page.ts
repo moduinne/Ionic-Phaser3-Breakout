@@ -13,10 +13,10 @@ const DPR:number = 2;
 })
 export class HomePage implements OnInit, OnDestroy {
   config: Phaser.Types.Core.GameConfig;
-
   game: Phaser.Game;
 
   constructor(private plt: Platform) {
+  
     this.config = {
       type: Phaser.AUTO,
       width: window.innerWidth * DPR,

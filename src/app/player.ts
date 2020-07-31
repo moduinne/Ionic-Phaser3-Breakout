@@ -1,7 +1,6 @@
  export class Player extends Phaser.Physics.Arcade.Sprite {
 
    //cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-   //control: Phaser.Input.Touch.TouchManager;
 
    constructor(scene, x, y, texture) {
      super(scene, x, y, texture);

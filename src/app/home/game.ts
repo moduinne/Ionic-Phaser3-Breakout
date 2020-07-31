@@ -1,7 +1,8 @@
 import * as Phaser from 'phaser';
 
 //GLOBAL CONSTANTS
-const SCALED = 0.20;
+const SCALED_CORRECTION = 1.75;
+const SCALED = 0.20 * SCALED_CORRECTION;
 const BLOCK_W = 150;
 const BLOCK_H = 100;
 const BLOCK_NUM = 3;
@@ -12,8 +13,12 @@ const BALL_START_Y = window.innerHeight + 300;
 
 export class GameScene extends Phaser.Scene {
 
-  private blocks: Phaser.Physics.Arcade.StaticGroup;
+  private blueBlocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private expandedBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private shrinkBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private gunBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private multiBlocks: Phaser.Physics.Arcade.StaticGroup;
   private paddle: Phaser.Physics.Arcade.Sprite;
   private balls: Phaser.Physics.Arcade.Group;
   private ball: Phaser.Physics.Arcade.Image;
@@ -34,6 +39,14 @@ export class GameScene extends Phaser.Scene {
 
   public restartButton;
 
+  public level_Json;
+  checkInfoText: Phaser.GameObjects.Text;
+
+  //HOW TO GET VALUES FROM JSON FILE
+    //   let x = parseInt(this.level_Json[1]['blueBlocks'][0].split(',')[0]);
+    //   let y = parseInt(this.level_Json[1]['blueBlocks'][0].split(',')[1]);
+    //   this.blueBlocks.create(x, y, 'blueBlock').setScale(SCALED).refreshBody();
+
   constructor() {
     super({ key: 'game' });
   }
@@ -52,14 +65,22 @@ export class GameScene extends Phaser.Scene {
     this.load.image('paddle','49-Breakout-Tiles.png');
     //audio
     this.load.setPath('assets/audio/');
-    this.load.audio('ballCrackBrickSound', 'zapsplat_impact_rock_small_hit_solid_ground_004_11181.mp3');
-    this.load.audio('ballKillBrickSound', 'zapsplat_impact_rock_small_hit_solid_ground_001_11178.mp3');
-    this.load.audio('ballHitPaddleSound','tom_chapman_impact_stone_on_frozen_lake_ice_thrown_skim_contact_microphone_002.mp3');
+    this.load.audio('ballCrackBrickSound', 
+            'zapsplat_impact_rock_small_hit_solid_ground_004_11181.mp3');
+    this.load.audio('ballKillBrickSound', 
+            'zapsplat_impact_rock_small_hit_solid_ground_001_11178.mp3');
+    this.load.audio('ballHitPaddleSound',
+            'tom_chapman_impact_stone_on_frozen_lake_ice_thrown_skim_contact_microphone_002.mp3');
+    
+    this.load.setPath('assets/Levels/');
+    this.load.json('lvlsJson', 'lvls.json'); 
   }
 
   //CREATE: PHASER METHOD///////////////////////////////////////////////////////////////////////////////
   create(){
-    this.addBlocks();
+
+    this.level_Json = this.cache.json.get('lvlsJson');
+    this.addBlocks(); //<-----------------this should be changed with each load up of new level
     this.addPaddle();
     this.addBall();
     this.addColliders();
@@ -72,6 +93,12 @@ export class GameScene extends Phaser.Scene {
   addInputCallBacks(){
     this.input.on('pointerdown',this.startDrag, this);
     this.input.once('pointerup', this.start, this);
+    this.input.on('pointerdown', () => {
+        let w = "width: " + innerWidth;
+        let h = "height: " + innerHeight;
+        this.checkInfoText.setText(w + "\n" + h);
+      }, this
+    );
   }
 
   //sets the boolean for game started to true
@@ -99,6 +126,17 @@ export class GameScene extends Phaser.Scene {
     this.input.off('pointerup', this.stopDrag, this);
   }
 
+  //call back for hovering with mouse over restartButton styling
+  enterButtonHoverState() {
+    this.restartButton.setStyle({ fill: '#ff0'});
+  }
+
+  //call back for entering button with mouse pointer styling
+  enterButtonRestState() {
+    this.restartButton.setStyle({ fill: '#0f0' });
+  }
+
+  //adds all the audio-files
   addAudio(){
     this.ball_crack_brick_sound = this.sound.add('ballCrackBrickSound');
     this.ball_kill_brick_sound = this.sound.add('ballKillBrickSound');
@@ -107,6 +145,16 @@ export class GameScene extends Phaser.Scene {
 
   //wrapper method for the Text objects of the game
   addTextObjects(){
+    this.checkInfoText = this.add.text(this.physics.world.bounds.width / 2,
+      this.physics.world.bounds.height / 2,
+      'Info<br>',
+      {
+        fontFamily: 'Monaco, Courier, monospace',
+        fontSize: '50px',
+        fill: '#fff'
+      }
+    );
+    this.checkInfoText.setOrigin(0.5);
     this.gameOverText =this.add.text(
       this.physics.world.bounds.width / 2,
       this.physics.world.bounds.height / 2,
@@ -170,27 +218,19 @@ export class GameScene extends Phaser.Scene {
     this.restartButton.on('pointerdown',() => {
       this.reBoot();
       });
-    this.restartButton.on('pointerdown',() => {
+    this.restartButton.on('pointerover',() => {
       this.enterButtonHoverState();
       });
-    this.restartButton.on('pointerdown',() => {
+    this.restartButton.on('pointerout',() => {
       this.enterButtonRestState();
       });
     this.restartButton.setVisible(false);
   }
 
-  enterButtonHoverState() {
-    this.restartButton.setStyle({ fill: '#ff0'});
-  }
-
-  enterButtonRestState() {
-    this.restartButton.setStyle({ fill: '#0f0' });
-  }
-
   //wrapper method for adding the collider call backs on the other elements of the game
   addColliders(){
     this.physics.world.checkCollision.down = false;
-    this.physics.add.collider(this.balls, this.blocks, this.hitSolidBlueBlock, null, this);
+    this.physics.add.collider(this.balls, this.blueBlocks, this.hitSolidBlueBlock, null, this);
     this.physics.add.collider(this.balls, this.crackedBlocks, this.hitCrackedBlueBlock, null, this);
     this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
   }
@@ -205,7 +245,7 @@ export class GameScene extends Phaser.Scene {
 
   //wrapper method for creating the player/paddle
   addPaddle(){
-    this.paddle = this.physics.add.sprite(START_X, PAD_START_Y, 'paddle').setScale((SCALED-0.05) * 2).refreshBody();
+    this.paddle = this.physics.add.sprite(START_X, PAD_START_Y, 'paddle').setScale((SCALED-0.05) * 2/1.75).refreshBody();
     this.paddle.setImmovable(true);
     this.paddle.setCollideWorldBounds(true);
     this.paddle.setX(this.game.input.activePointer.x);
@@ -214,25 +254,30 @@ export class GameScene extends Phaser.Scene {
 
   //wrapper method for creating blocks for the lvl
   addBlocks(){
-    this.blocks = this.physics.add.staticGroup();
+    this.blueBlocks = this.physics.add.staticGroup();
     this.crackedBlocks = this.physics.add.staticGroup();
+    this.shrinkBlocks = this.physics.add.staticGroup();
+    this.expandedBlocks = this.physics.add.staticGroup();
+    this.gunBlocks = this.physics.add.staticGroup();
+    this. multiBlocks = this.physics.add.staticGroup();
+
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'crackedBlue').setScale(SCALED).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+      this.blueBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'blueBlock').setScale(SCALED).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'crackedBlue').setScale(SCALED).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+     this.blueBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'blueBlock').setScale(SCALED).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED* 1.75).refreshBody();
+      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED).refreshBody();
     }
     for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'blueBlock').setScale(SCALED* 1.75).refreshBody();
+     this.blueBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'blueBlock').setScale(SCALED).refreshBody();
     }
   }
 
@@ -268,6 +313,7 @@ export class GameScene extends Phaser.Scene {
 
   //call back method for hitting a solid blue block
   hitSolidBlueBlock(ball, block){
+    //sound for cracking the solid block
     this.ball_crack_brick_sound.play();
     block.disableBody(true, true);
     if (ball.body.velocity.x === 0) {
@@ -293,8 +339,12 @@ export class GameScene extends Phaser.Scene {
 
   //returns true iff all blocks in all lists are equal to zero
   isWon(){
-    return this.blocks.countActive() === 0 &&
-           this.crackedBlocks.countActive() ===0;
+    return this.blueBlocks.countActive() === 0 &&
+           this.crackedBlocks.countActive() === 0 &&
+           this.expandedBlocks.countActive() === 0 &&
+           this.shrinkBlocks.countActive() === 0 &&
+           this.gunBlocks.countActive() === 0 &&
+           this.multiBlocks.countActive() === 0;
   }
 
   //UPDATE: PHASER METHOD////////////////////////////////////////////////////////////////////////////////
@@ -323,7 +373,6 @@ export class GameScene extends Phaser.Scene {
       this.playerWonText.setVisible(true);
       this.ball.disableBody(true, true);
       this.paddle.disableBody(true,true);
-      // this.physics.pause;
       this.restartButton.setVisible(true);
       }
     else {

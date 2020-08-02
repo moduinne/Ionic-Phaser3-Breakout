@@ -5,16 +5,17 @@ import * as Phaser from 'phaser';
 //GLOBAL CONSTANTS
 const SCALED_CORRECTION = 1.75;
 const SCALED = 0.20 * SCALED_CORRECTION;
-const BLOCK_W = 150;
-const BLOCK_H = 100;
-const BLOCK_NUM = 3;
-const BLOCK_START_X = (window.innerWidth/2) + 25;//<-helps keep aligned in OPPO phone
+const BLOCK_X_CORRECTION = 60;
+// const BLOCK_H = 100;
+// const BLOCK_NUM = 3;
+// const BLOCK_START_X = (window.innerWidth/2) + 25;//<-helps keep aligned in OPPO phone
 const START_X = (window.innerWidth/2) + 150;
 const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
 
 export class GameScene extends Phaser.Scene {
-
+  private emitter0;
+  private emitter1;
   private blueBlocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
   private expandedBlocks: Phaser.Physics.Arcade.StaticGroup;
@@ -55,6 +56,10 @@ export class GameScene extends Phaser.Scene {
 
   //PRELOAD: PHASER METHOD//////////////////////////////////////////////////////////////////////////////
   preload() {
+    //load particles images
+    this.load.image('spark0', 'assets/particles/blue.png');
+    this.load.image('spark1', 'assets/particles/red.png');
+
     this.load.setPath('assets/imgs/');
     this.load.image('background', 'galaxy.png');
     //set path for all 
@@ -82,6 +87,30 @@ export class GameScene extends Phaser.Scene {
 
   //CREATE: PHASER METHOD///////////////////////////////////////////////////////////////////////////////
   create(){
+
+    this.emitter0 = this.add.particles('spark0').createEmitter({
+      x: 400,
+      y: 300,
+      speed: { min: -800, max: 800 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.5, end: 0 },
+      blendMode: 'SCREEN',
+      //active: false,
+      lifespan: 600,
+      gravityY: 800
+  });
+
+  this.emitter1 = this.add.particles('spark1').createEmitter({
+      x: 400,
+      y: 300,
+      speed: { min: -800, max: 800 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.3, end: 0 },
+      blendMode: 'SCREEN',
+      //active: false,
+      lifespan: 300,
+      gravityY: 800
+  });
 
     this.level_Json = this.cache.json.get('lvlsJson');
     this.add.image(0, 0, 'background').setOrigin(0);
@@ -263,14 +292,14 @@ export class GameScene extends Phaser.Scene {
     //load the cracked blocks for the level
     let blueCrackedList = this.level_Json[lvl-1]['crackedBlocks'];
     for(let i = 0 ; i < blueCrackedList.length ; i++){
-      let x = parseInt(blueCrackedList[i].split(',')[0]);
+      let x = parseInt(blueCrackedList[i].split(',')[0]) + BLOCK_X_CORRECTION;
       let y = parseInt(blueCrackedList[i].split(',')[1]);
       this.crackedBlocks.create(x,y,'crackedBlue').setScale(SCALED).refreshBody();
     }
     //load blue blocks for the level
     let blueList = this.level_Json[lvl-1]['blueBlocks'];
     for(let i = 0 ; i < blueList.length ; i++){
-      let x = parseInt(blueList[i].split(',')[0]);
+      let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
       let y = parseInt(blueList[i].split(',')[1]);
       this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
     }
@@ -293,6 +322,10 @@ export class GameScene extends Phaser.Scene {
 
   //call back method for collider of ball on blue block
   hitCrackedBlueBlock(ball, block){
+    this.emitter0.setPosition(block.x, block.y);
+    this.emitter1.setPosition(block.x, block.y);
+    this.emitter0.explode();
+    this.emitter1.explode();
     this.ball_kill_brick_sound.play();
     block.disableBody(true, true);
     this.score += 10;
@@ -312,6 +345,10 @@ export class GameScene extends Phaser.Scene {
     //sound for cracking the solid block
     this.ball_crack_brick_sound.play();
     block.disableBody(true, true);
+    this.emitter0.setPosition(block.x, block.y);
+    this.emitter1.setPosition(block.x, block.y);
+    this.emitter0.explode();
+    this.emitter1.explode();
     this.score += 5;
     this.scoreText.setText('Score: ' + this.score);
     if (ball.body.velocity.x === 0) {

@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
-
+//OPPO W AND H INFO
+//W = 360 (720) paddle starts at 337, 1067
+//H = 654 (1308)
 //GLOBAL CONSTANTS
 const SCALED_CORRECTION = 1.75;
 const SCALED = 0.20 * SCALED_CORRECTION;
@@ -30,7 +32,10 @@ export class GameScene extends Phaser.Scene {
   public scoreText;
   public playerWonText;
   public score = 0;
+
   public dragObj;
+  public checkObject;
+
   public started = false;
 
   public ball_crack_brick_sound;
@@ -40,12 +45,9 @@ export class GameScene extends Phaser.Scene {
   public restartButton;
 
   public level_Json;
-  checkInfoText: Phaser.GameObjects.Text;
 
-  //HOW TO GET VALUES FROM JSON FILE
-    //   let x = parseInt(this.level_Json[1]['blueBlocks'][0].split(',')[0]);
-    //   let y = parseInt(this.level_Json[1]['blueBlocks'][0].split(',')[1]);
-    //   this.blueBlocks.create(x, y, 'blueBlock').setScale(SCALED).refreshBody();
+  public level = 1;
+  public numLevels = 3;
 
   constructor() {
     super({ key: 'game' });
@@ -53,6 +55,8 @@ export class GameScene extends Phaser.Scene {
 
   //PRELOAD: PHASER METHOD//////////////////////////////////////////////////////////////////////////////
   preload() {
+    this.load.setPath('assets/imgs/');
+    this.load.image('background', 'galaxy.png');
     //set path for all 
     this.load.setPath('assets/imgs/Breakout_TileSet_Free/PNG/');
     //blue block image
@@ -80,7 +84,8 @@ export class GameScene extends Phaser.Scene {
   create(){
 
     this.level_Json = this.cache.json.get('lvlsJson');
-    this.addBlocks(); //<-----------------this should be changed with each load up of new level
+    this.add.image(0, 0, 'background').setOrigin(0);
+    this.addBlocks();
     this.addPaddle();
     this.addBall();
     this.addColliders();
@@ -93,12 +98,6 @@ export class GameScene extends Phaser.Scene {
   addInputCallBacks(){
     this.input.on('pointerdown',this.startDrag, this);
     this.input.once('pointerup', this.start, this);
-    this.input.on('pointerdown', () => {
-        let w = "width: " + innerWidth;
-        let h = "height: " + innerHeight;
-        this.checkInfoText.setText(w + "\n" + h);
-      }, this
-    );
   }
 
   //sets the boolean for game started to true
@@ -145,16 +144,6 @@ export class GameScene extends Phaser.Scene {
 
   //wrapper method for the Text objects of the game
   addTextObjects(){
-    this.checkInfoText = this.add.text(this.physics.world.bounds.width / 2,
-      this.physics.world.bounds.height / 2,
-      'Info<br>',
-      {
-        fontFamily: 'Monaco, Courier, monospace',
-        fontSize: '50px',
-        fill: '#fff'
-      }
-    );
-    this.checkInfoText.setOrigin(0.5);
     this.gameOverText =this.add.text(
       this.physics.world.bounds.width / 2,
       this.physics.world.bounds.height / 2,
@@ -260,26 +249,33 @@ export class GameScene extends Phaser.Scene {
     this.expandedBlocks = this.physics.add.staticGroup();
     this.gunBlocks = this.physics.add.staticGroup();
     this. multiBlocks = this.physics.add.staticGroup();
+    this.loadLevel(this.level);
+  }
 
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'crackedBlue').setScale(SCALED).refreshBody();
+  loadLevel(lvl){
+    this.blueBlocks.clear(true,true);
+    this.crackedBlocks.clear(true,true);
+    this.shrinkBlocks.clear(true,true);
+    this.multiBlocks.clear(true,true);
+    this.gunBlocks.clear(true,true);
+    this.expandedBlocks.clear(true,true);
+
+    //load the cracked blocks for the level
+    let blueCrackedList = this.level_Json[lvl-1]['crackedBlocks'];
+    for(let i = 0 ; i < blueCrackedList.length ; i++){
+      let x = parseInt(blueCrackedList[i].split(',')[0]);
+      let y = parseInt(blueCrackedList[i].split(',')[1]);
+      this.crackedBlocks.create(x,y,'crackedBlue').setScale(SCALED).refreshBody();
     }
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.blueBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,window.innerHeight/4, 'blueBlock').setScale(SCALED).refreshBody();
-    }
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'crackedBlue').setScale(SCALED).refreshBody();
-    }
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-     this.blueBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + BLOCK_H, 'blueBlock').setScale(SCALED).refreshBody();
-    }
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-      this.crackedBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'crackedBlue').setScale(SCALED).refreshBody();
-    }
-    for(let i = 0 ; i < BLOCK_NUM ; i++){
-     this.blueBlocks.create(BLOCK_START_X+(i*BLOCK_W) ,(window.innerHeight/4) + (BLOCK_H*2), 'blueBlock').setScale(SCALED).refreshBody();
+    //load blue blocks for the level
+    let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    for(let i = 0 ; i < blueList.length ; i++){
+      let x = parseInt(blueList[i].split(',')[0]);
+      let y = parseInt(blueList[i].split(',')[1]);
+      this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
     }
   }
+
 
   //call back method for collider of ball on paddle
   hitPlayer(){
@@ -316,6 +312,8 @@ export class GameScene extends Phaser.Scene {
     //sound for cracking the solid block
     this.ball_crack_brick_sound.play();
     block.disableBody(true, true);
+    this.score += 5;
+    this.scoreText.setText('Score: ' + this.score);
     if (ball.body.velocity.x === 0) {
       let randNum = Math.random();
       if (randNum >= 0.5) {
@@ -344,7 +342,17 @@ export class GameScene extends Phaser.Scene {
            this.expandedBlocks.countActive() === 0 &&
            this.shrinkBlocks.countActive() === 0 &&
            this.gunBlocks.countActive() === 0 &&
-           this.multiBlocks.countActive() === 0;
+           this.multiBlocks.countActive() === 0 &&
+           this.level === this.numLevels;
+  }
+
+  levelWon(){
+    return this.blueBlocks.countActive() === 0 &&
+    this.crackedBlocks.countActive() === 0 &&
+    this.expandedBlocks.countActive() === 0 &&
+    this.shrinkBlocks.countActive() === 0 &&
+    this.gunBlocks.countActive() === 0 &&
+    this.multiBlocks.countActive() === 0;
   }
 
   //UPDATE: PHASER METHOD////////////////////////////////////////////////////////////////////////////////
@@ -368,13 +376,16 @@ export class GameScene extends Phaser.Scene {
         this.ball.setVelocityY(0);
       }
     }
-    else if (this.isWon()) {
+    else if (this.isWon() && this.levelWon()) {
       this.physics.pause;
       this.playerWonText.setVisible(true);
       this.ball.disableBody(true, true);
       this.paddle.disableBody(true,true);
       this.restartButton.setVisible(true);
       }
+    else if (this.levelWon() && !this.isWon()){
+      this.goToNextLevel();
+    }
     else {
       if (!this.gameStarted) {
         this.paddle.setX(START_X);
@@ -389,8 +400,18 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  //Method for rebooting the game after winning or losing
+  //method to move to the next level
+  goToNextLevel(){
+    this.started = false;
+    this.gameStarted = false;
+    this.level += 1;
+    this.scene.restart();
+  }
+
+  //Method for rebooting the game after totally losing
   reBoot(){
+    this.score = 0;
+    this.level = 1;
     this.lives = 3;
     this.started = false;
     this.gameStarted = false;

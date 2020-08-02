@@ -1,8 +1,12 @@
 [
     {
         "level" : 1,
-        "blueBlocks": ["100,100","200,200","300,300"],
-        "crackedBlocks": ["100,100","200,200","300,300"],
+        "blueBlocks": [
+            "145.3,344.35",
+            "295.3,344.35",
+            "445.3,344.35"
+        ],
+        "crackedBlocks": [],
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
@@ -10,11 +14,37 @@
     },
     {
         "level" : 2,
-        "blueBlocks" : ["300,300","100,400"],
-        "crackedBlocks": ["300,300","100,400"],
+        "blueBlocks" : [
+            "145.3,144.35", 
+            "445.3,144.35",
+            "295.3,244.35",
+            "145.3,344.35",
+            "445.3,344.35"
+        ],
+        "crackedBlocks": [
+            "145.3,144.35", 
+            "445.3,144.35",
+            "295.3,244.35",
+            "145.3,344.35",
+            "445.3,344.35"
+        ],
+        "expandedBlocks": [],
+        "shrinkBlocks": [],
+        "gunBlocks": [],
+        "multiBlocks": []
+    },
+    {
+        "level" : 3,
+        "blueBlocks" : [
+            "445.3,344.35"
+        ],
+        "crackedBlocks": [
+            "445.3,344.35"
+        ],
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
         "multiBlocks": []
     }
+
 ]

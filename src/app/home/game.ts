@@ -247,9 +247,9 @@ export class GameScene extends Phaser.Scene {
       });
     this.restartButton.setVisible(false);
 
-    this.nextLevelButton = this.add.text(this.physics.world.bounds.width / 3,
-      this.physics.world.bounds.height / 1.5,
-      'LEVEL ', 
+    this.nextLevelButton = this.add.text(this.physics.world.bounds.width / 2,
+      this.physics.world.bounds.height / 2,
+      'TAP TO START\nLEVEL ', 
     {
       fontFamily: 'Monaco, Courier, monospace',
       fontSize: '50px',
@@ -260,6 +260,7 @@ export class GameScene extends Phaser.Scene {
     this.nextLevelButton.on('pointerdown',() => {
       this.goToNextLevel();
       });
+    this.nextLevelButton.setOrigin(0.5);
     this.nextLevelButton.setVisible(false);
   }
 
@@ -283,6 +284,7 @@ export class GameScene extends Phaser.Scene {
   addPaddle(){
     this.paddle = this.physics.add.sprite(START_X, PAD_START_Y, 'paddle').setScale((SCALED-0.05) * 2/1.75).refreshBody();
     this.paddle.setImmovable(true);
+    this.paddle.body.setMass(600);
     this.paddle.setCollideWorldBounds(true);
     this.paddle.setX(this.game.input.activePointer.x);
     this.paddle.setInteractive();
@@ -442,7 +444,8 @@ export class GameScene extends Phaser.Scene {
       this.paddle.setX(START_X)
       this.ball.setPosition(START_X, BALL_START_Y);
       this.ball.setVelocity(0,0);
-      this.nextLevelButton.setText("LEVEL " + (this.level+1));
+      this.nextLevelButton.setText('TAP TO START\n\nLEVEL '+(this.level+1));
+      this.nextLevelButton.setAlign('center');
       this.nextLevelButton.setVisible(true);
       
     }

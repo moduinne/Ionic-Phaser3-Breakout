@@ -49,7 +49,7 @@ export class GameScene extends Phaser.Scene {
   public level_Json;
 
   public level = 1;
-  public numLevels = 3;
+  public numLevels;
 
   constructor() {
     super({ key: 'game' });
@@ -73,9 +73,11 @@ export class GameScene extends Phaser.Scene {
     //cracked blue block image
     this.load.image('crackedBlue','02-Breakout-Tiles.png');
     //ball image
-    this.load.image('ball','bomb.png');
+    //this.load.image('ball','bomb.png');
+    this.load.image('ball','58-Breakout-Tiles.png');
     //paddle image
-    this.load.image('paddle','49-Breakout-Tiles.png');
+    //this.load.image('paddle','49-Breakout-Tiles.png');
+    this.load.image('paddle','56-Breakout-Tiles.png');
     //audio
     this.load.setPath('assets/audio/');
     this.load.audio('ballCrackBrickSound', 
@@ -92,6 +94,7 @@ export class GameScene extends Phaser.Scene {
   //CREATE: PHASER METHOD///////////////////////////////////////////////////////////////////////////////
   create(){
     this.level_Json = this.cache.json.get('lvlsJson');
+    this.numLevels = this.level_Json.length;
     this.add.image(0, 0, 'background').setOrigin(0);
     this.addBlocks();
     this.addPaddle();
@@ -100,6 +103,7 @@ export class GameScene extends Phaser.Scene {
     this.addTextObjects();
     this.addInputCallBacks();
     this.addAudio();
+    //placed far away so you can't see it
     this.emitter0 = this.add.particles('spark0').createEmitter({
       x: -4000,
       y: -3000,
@@ -111,6 +115,7 @@ export class GameScene extends Phaser.Scene {
       lifespan: 1000,
       gravityY: 500
   });
+  //placed far away so you can't see it
   this.emitter1 = this.add.particles('spark1').createEmitter({
       x: -4000,
       y: -3000,
@@ -249,7 +254,7 @@ export class GameScene extends Phaser.Scene {
 
     this.nextLevelButton = this.add.text(this.physics.world.bounds.width / 2,
       this.physics.world.bounds.height / 2,
-      'TAP TO START\nLEVEL ', 
+      'TOUCH HERE TO START\nLEVEL ', 
     {
       fontFamily: 'Monaco, Courier, monospace',
       fontSize: '50px',
@@ -275,7 +280,7 @@ export class GameScene extends Phaser.Scene {
   //wrapper method for creating the ball
   addBall(){
     this.balls = this.physics.add.group();
-    this.ball = this.balls.create(START_X, BALL_START_Y,'ball').setScale(1.5).refreshBody();
+    this.ball = this.balls.create(START_X, BALL_START_Y,'ball').setScale(0.25).refreshBody();
     this.ball.setBounce(1, 1);
     this.ball.setCollideWorldBounds(true);
   }
@@ -444,7 +449,7 @@ export class GameScene extends Phaser.Scene {
       this.paddle.setX(START_X)
       this.ball.setPosition(START_X, BALL_START_Y);
       this.ball.setVelocity(0,0);
-      this.nextLevelButton.setText('TAP TO START\n\nLEVEL '+(this.level+1));
+      this.nextLevelButton.setText('TAP HERE TO START\n\nLEVEL '+(this.level+1));
       this.nextLevelButton.setAlign('center');
       this.nextLevelButton.setVisible(true);
       

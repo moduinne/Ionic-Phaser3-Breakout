@@ -16,6 +16,7 @@ const BALL_START_Y = window.innerHeight + 300;
 export class GameScene extends Phaser.Scene {
   private emitter0;
   private emitter1;
+  private blueBallEmitter;
   private blueBlocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
   private expandedBlocks: Phaser.Physics.Arcade.StaticGroup;
@@ -127,6 +128,14 @@ export class GameScene extends Phaser.Scene {
       lifespan: 1000,
       gravityY: 500
   });
+  let ballParticle = this.add.particles('spark0');
+  this.blueBallEmitter = ballParticle.createEmitter({
+    speed:1,
+    scale:{ start:0.5,end:0.1},
+    blendMode: 'ADD'
+  });
+  this.blueBallEmitter.startFollow(this.ball);
+
   }
 
   //add call backs for the in-built pointer
@@ -291,7 +300,6 @@ export class GameScene extends Phaser.Scene {
     this.paddle.setImmovable(true);
     this.paddle.body.setMass(600);
     this.paddle.setCollideWorldBounds(true);
-    this.paddle.setX(this.game.input.activePointer.x);
     this.paddle.setInteractive();
   }
 

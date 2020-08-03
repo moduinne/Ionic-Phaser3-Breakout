@@ -59,6 +59,9 @@ export class GameScene extends Phaser.Scene {
     //load particles images
     this.load.image('spark0', 'assets/particles/blue.png');
     this.load.image('spark1', 'assets/particles/red.png');
+    
+    //load square to control paddle
+    //this.load.image('paddleSquare','assets/imgs/paddleSquare.png');
 
     this.load.setPath('assets/imgs/');
     this.load.image('background', 'galaxy.png');
@@ -87,31 +90,6 @@ export class GameScene extends Phaser.Scene {
 
   //CREATE: PHASER METHOD///////////////////////////////////////////////////////////////////////////////
   create(){
-
-    this.emitter0 = this.add.particles('spark0').createEmitter({
-      x: 400,
-      y: 300,
-      speed: { min: -800, max: 800 },
-      angle: { min: 0, max: 360 },
-      scale: { start: 0.5, end: 0 },
-      blendMode: 'SCREEN',
-      //active: false,
-      lifespan: 600,
-      gravityY: 800
-  });
-
-  this.emitter1 = this.add.particles('spark1').createEmitter({
-      x: 400,
-      y: 300,
-      speed: { min: -800, max: 800 },
-      angle: { min: 0, max: 360 },
-      scale: { start: 0.3, end: 0 },
-      blendMode: 'SCREEN',
-      //active: false,
-      lifespan: 300,
-      gravityY: 800
-  });
-
     this.level_Json = this.cache.json.get('lvlsJson');
     this.add.image(0, 0, 'background').setOrigin(0);
     this.addBlocks();
@@ -121,9 +99,31 @@ export class GameScene extends Phaser.Scene {
     this.addTextObjects();
     this.addInputCallBacks();
     this.addAudio();
+    this.emitter0 = this.add.particles('spark0').createEmitter({
+      x: -400,
+      y: -300,
+      speed: { min: -800, max: 800 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.5, end: 0 },
+      blendMode: 'SCREEN',
+      //active: false,
+      lifespan: 600,
+      gravityY: 800
+  });
+  this.emitter1 = this.add.particles('spark1').createEmitter({
+      x: -400,
+      y: -300,
+      speed: { min: -800, max: 800 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.3, end: 0 },
+      blendMode: 'SCREEN',
+      //active: false,
+      lifespan: 300,
+      gravityY: 800
+  });
   }
 
-  //add call backs for the inbuilt pointer
+  //add call backs for the in-built pointer
   addInputCallBacks(){
     this.input.on('pointerdown',this.startDrag, this);
     this.input.once('pointerup', this.start, this);
@@ -138,13 +138,15 @@ export class GameScene extends Phaser.Scene {
   startDrag(pointer, targets){
     this.input.off('pointerdown',this.startDrag, this);
     this.dragObj = targets[0];
+    console.log(this.dragObj);
     this.input.on('pointermove', this.doDrag, this);
     this.input.on('pointerup', this.stopDrag, this);
   }
 
   //call back method for while dragging touch on screen is happening
   doDrag(pointer){ 
-    this.dragObj.x = pointer.x;
+    //this.dragObj.x = pointer.x;
+    this.paddle.x = pointer.x;
   }
 
   //call back for pointer input when drag has stopped
@@ -281,6 +283,7 @@ export class GameScene extends Phaser.Scene {
     this.loadLevel(this.level);
   }
 
+  //Adds the blocks from the Json objects based upon the lvl number
   loadLevel(lvl){
     this.blueBlocks.clear(true,true);
     this.crackedBlocks.clear(true,true);
@@ -304,7 +307,6 @@ export class GameScene extends Phaser.Scene {
       this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
     }
   }
-
 
   //call back method for collider of ball on paddle
   hitPlayer(){
@@ -342,7 +344,6 @@ export class GameScene extends Phaser.Scene {
 
   //call back method for hitting a solid blue block
   hitSolidBlueBlock(ball, block){
-    //sound for cracking the solid block
     this.ball_crack_brick_sound.play();
     block.disableBody(true, true);
     this.emitter0.setPosition(block.x, block.y);

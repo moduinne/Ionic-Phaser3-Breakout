@@ -44,6 +44,7 @@ export class GameScene extends Phaser.Scene {
   public ball_hit_paddle_sound;
 
   public restartButton;
+  public nextLevelButton;
 
   public level_Json;
 
@@ -100,26 +101,26 @@ export class GameScene extends Phaser.Scene {
     this.addInputCallBacks();
     this.addAudio();
     this.emitter0 = this.add.particles('spark0').createEmitter({
-      x: -400,
-      y: -300,
+      x: -4000,
+      y: -3000,
       speed: { min: -800, max: 800 },
       angle: { min: 0, max: 360 },
       scale: { start: 0.5, end: 0 },
       blendMode: 'SCREEN',
       //active: false,
-      lifespan: 600,
-      gravityY: 800
+      lifespan: 1000,
+      gravityY: 500
   });
   this.emitter1 = this.add.particles('spark1').createEmitter({
-      x: -400,
-      y: -300,
+      x: -4000,
+      y: -3000,
       speed: { min: -800, max: 800 },
       angle: { min: 0, max: 360 },
       scale: { start: 0.3, end: 0 },
       blendMode: 'SCREEN',
       //active: false,
-      lifespan: 300,
-      gravityY: 800
+      lifespan: 1000,
+      gravityY: 500
   });
   }
 
@@ -138,7 +139,7 @@ export class GameScene extends Phaser.Scene {
   startDrag(pointer, targets){
     this.input.off('pointerdown',this.startDrag, this);
     this.dragObj = targets[0];
-    console.log(this.dragObj);
+    //console.log(this.dragObj);
     this.input.on('pointermove', this.doDrag, this);
     this.input.on('pointerup', this.stopDrag, this);
   }
@@ -245,6 +246,21 @@ export class GameScene extends Phaser.Scene {
       this.enterButtonRestState();
       });
     this.restartButton.setVisible(false);
+
+    this.nextLevelButton = this.add.text(this.physics.world.bounds.width / 3,
+      this.physics.world.bounds.height / 1.5,
+      'LEVEL ', 
+    {
+      fontFamily: 'Monaco, Courier, monospace',
+      fontSize: '50px',
+      fill: '#fff' 
+    }
+    );
+    this.nextLevelButton.setInteractive();
+    this.nextLevelButton.on('pointerdown',() => {
+      this.goToNextLevel();
+      });
+    this.nextLevelButton.setVisible(false);
   }
 
   //wrapper method for adding the collider call backs on the other elements of the game
@@ -415,14 +431,20 @@ export class GameScene extends Phaser.Scene {
       }
     }
     else if (this.isWon() && this.levelWon()) {
-      this.physics.pause;
+      this.physics.pause();
       this.playerWonText.setVisible(true);
       this.ball.disableBody(true, true);
       this.paddle.disableBody(true,true);
       this.restartButton.setVisible(true);
       }
     else if (this.levelWon() && !this.isWon()){
-      this.goToNextLevel();
+      this.physics.pause();
+      this.paddle.setX(START_X)
+      this.ball.setPosition(START_X, BALL_START_Y);
+      this.ball.setVelocity(0,0);
+      this.nextLevelButton.setText("LEVEL " + (this.level+1));
+      this.nextLevelButton.setVisible(true);
+      
     }
     else {
       if (!this.gameStarted) {

@@ -1,16 +1,28 @@
 [
     {
         "level" : 1,
-        "blueBlocks": [
-            "145.3,344.35",
-            "295.3,344.35",
-            "445.3,344.35"
-        ],
+        "blueBlocks": [],
         "crackedBlocks": [],
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
-        "multiBlocks": []
+        "multiBlocks": [],
+        "limeBlocks": [ 
+            "295.3,344.35",
+            "445.3,344.35"],
+        "crackedLimeBlocks": [
+            "295.3,344.35",
+            "445.3,344.35"],
+        "purpleBlocks": ["145.3,344.35"],
+        "crackedPurpleBlocks": ["145.3,344.35"],
+        "orangeBlocks": [],
+        "crackedOrangeBlocks": [],
+        "lightOrangeBlocks": [],
+        "crackedLightOrangeBlocks": [],
+        "lightBlueBlocks": [],
+        "crackedLightBlueBlocks": [],
+        "yellowBlocks": [],
+        "crackedYellowBlocks": []
     },
     {
         "level" : 2,
@@ -31,7 +43,19 @@
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
-        "multiBlocks": []
+        "multiBlocks": [],
+        "limeBlocks": [],
+        "crackedLimeBlocks": [],
+        "purpleBlocks": [],
+        "crackedPurpleBlocks": [],
+        "orangeBlocks": [],
+        "crackedOrangeBlocks": [],
+        "lightOrangeBlocks": [],
+        "crackedLightOrangeBlocks": [],
+        "lightBlueBlocks": [],
+        "crackedLightBlueBlocks": [],
+        "yellowBlocks": [],
+        "crackedYellowBlocks": []
     },
     {
         "level" : 3,
@@ -53,7 +77,19 @@
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
-        "multiBlocks": []
+        "multiBlocks": [],
+        "limeBlocks": [],
+        "crackedLimeBlocks": [],
+        "purpleBlocks": [],
+        "crackedPurpleBlocks": [],
+        "orangeBlocks": [],
+        "crackedOrangeBlocks": [],
+        "lightOrangeBlocks": [],
+        "crackedLightOrangeBlocks": [],
+        "lightBlueBlocks": [],
+        "crackedLightBlueBlocks": [],
+        "yellowBlocks": [],
+        "crackedYellowBlocks": []
     },
     {
         "level" : 4,
@@ -82,7 +118,19 @@
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
-        "multiBlocks": []
+        "multiBlocks": [],
+        "limeBlocks": [],
+        "crackedLimeBlocks": [],
+        "purpleBlocks": [],
+        "crackedPurpleBlocks": [],
+        "orangeBlocks": [],
+        "crackedOrangeBlocks": [],
+        "lightOrangeBlocks": [],
+        "crackedLightOrangeBlocks": [],
+        "lightBlueBlocks": [],
+        "crackedLightBlueBlocks": [],
+        "yellowBlocks": [],
+        "crackedYellowBlocks": []
     },
     {
         "level" : 5,
@@ -109,6 +157,18 @@
         "expandedBlocks": [],
         "shrinkBlocks": [],
         "gunBlocks": [],
-        "multiBlocks": []
+        "multiBlocks": [],
+        "limeBlocks": [],
+        "crackedLimeBlocks": [],
+        "purpleBlocks": [],
+        "crackedPurpleBlocks": [],
+        "orangeBlocks": [],
+        "crackedOrangeBlocks": [],
+        "lightOrangeBlocks": [],
+        "crackedLightOrangeBlocks": [],
+        "lightBlueBlocks": [],
+        "crackedLightBlueBlocks": [],
+        "yellowBlocks": [],
+        "crackedYellowBlocks": []
     }
 ]

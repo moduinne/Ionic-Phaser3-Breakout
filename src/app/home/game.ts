@@ -14,18 +14,46 @@ const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
 
 export class GameScene extends Phaser.Scene {
+
+  //emitters
   private emitter0;
   private emitter1;
   private blueBallEmitter;
+
+  //normal blocks types
   private blueBlocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private limeBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedLimeBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private purpleBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedPurpleBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private orangeBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedOrangeBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private lightOrangeBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedLightOrangeBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private ligthBlueBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedLightBlueBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private yellowBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedYellowBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private greenBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedGreenBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private greyBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedGreyBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private brownBlocks: Phaser.Physics.Arcade.StaticGroup;
+  private crackedBrownBlocks: Phaser.Physics.Arcade.StaticGroup;
+  
+  //special block types
   private expandedBlocks: Phaser.Physics.Arcade.StaticGroup;
   private shrinkBlocks: Phaser.Physics.Arcade.StaticGroup;
   private gunBlocks: Phaser.Physics.Arcade.StaticGroup;
   private multiBlocks: Phaser.Physics.Arcade.StaticGroup;
   private paddle: Phaser.Physics.Arcade.Sprite;
+
+  //balls
   private balls: Phaser.Physics.Arcade.Group;
   private ball: Phaser.Physics.Arcade.Image;
+
+  //variables
   public gameStarted:Boolean = false;
   public lives:number = 3;
   public gameOverText;
@@ -61,9 +89,6 @@ export class GameScene extends Phaser.Scene {
     //load particles images
     this.load.image('spark0', 'assets/particles/blue.png');
     this.load.image('spark1', 'assets/particles/red.png');
-    
-    //load square to control paddle
-    //this.load.image('paddleSquare','assets/imgs/paddleSquare.png');
 
     this.load.setPath('assets/imgs/');
     this.load.image('background', 'galaxy.png');
@@ -73,6 +98,21 @@ export class GameScene extends Phaser.Scene {
     this.load.image('blueBlock','01-Breakout-Tiles.png');
     //cracked blue block image
     this.load.image('crackedBlue','02-Breakout-Tiles.png');
+
+
+    this.load.image('limeBlock', '03-Breakout-Tiles.png' );
+    this.load.image('crackedLimeBlock', '04-Breakout-Tiles.png');
+    this.load.image('purpleBlock', '05-Breakout-Tiles.png');
+    this.load.image('crackedPurpleBlock', '06-Breakout-Tiles.png');
+    this.load.image('orangeBlock', '07-Breakout-Tiles.png');
+    this.load.image('crackedOrangeBlock', '08-Breakout-Tiles.png');
+    this.load.image('lightOrangeBlock', '09-Breakout-Tiles.png');
+    this.load.image('crackedLightOrangeBlock', '10-Breakout-Tiles.png');
+    this.load.image('lightBlueBlock', '11-Breakout-Tiles.png');
+    this.load.image('crackedLightBlueBlock', '12-Breakout-Tiles.png');
+    this.load.image('yellowBlock', '13-Breakout-Tiles.png');
+    this.load.image('crackedYellowBlock', '14-Breakout-Tiles.png');
+
     //ball image
     //this.load.image('ball','bomb.png');
     this.load.image('ball','58-Breakout-Tiles.png');
@@ -128,6 +168,8 @@ export class GameScene extends Phaser.Scene {
       lifespan: 1000,
       gravityY: 500
   });
+
+  //particle emitter to follow ball
   let ballParticle = this.add.particles('spark0');
   this.blueBallEmitter = ballParticle.createEmitter({
     speed:1,
@@ -279,10 +321,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   //wrapper method for adding the collider call backs on the other elements of the game
+  //solid and cracked blocks have same for all coloured blocks
   addColliders(){
     this.physics.world.checkCollision.down = false;
     this.physics.add.collider(this.balls, this.blueBlocks, this.hitSolidBlueBlock, null, this);
     this.physics.add.collider(this.balls, this.crackedBlocks, this.hitCrackedBlueBlock, null, this);
+    this.physics.add.collider(this.balls,this.limeBlocks, this.hitSolidBlueBlock, null,this);
+    this.physics.add.collider(this.balls, this.crackedLimeBlocks, this.hitCrackedBlueBlock, null, this);
+    this.physics.add.collider(this.balls,this.purpleBlocks,this.hitSolidBlueBlock,null,this);
+    this.physics.add.collider(this.balls,this.crackedPurpleBlocks,this.hitCrackedBlueBlock,null,this);
     this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
   }
 
@@ -307,6 +354,20 @@ export class GameScene extends Phaser.Scene {
   addBlocks(){
     this.blueBlocks = this.physics.add.staticGroup();
     this.crackedBlocks = this.physics.add.staticGroup();
+
+    this.limeBlocks = this.physics.add.staticGroup();
+    this.crackedLimeBlocks = this.physics.add.staticGroup();
+    this.purpleBlocks = this.physics.add.staticGroup();
+    this.crackedPurpleBlocks = this.physics.add.staticGroup();
+    this.orangeBlocks = this.physics.add.staticGroup();
+    this.crackedOrangeBlocks = this.physics.add.staticGroup();
+    this.lightOrangeBlocks = this.physics.add.staticGroup();
+    this.crackedLightOrangeBlocks = this.physics.add.staticGroup();
+    this.ligthBlueBlocks = this.physics.add.staticGroup();
+    this.crackedLightBlueBlocks = this.physics.add.staticGroup();
+    this.yellowBlocks = this.physics.add.staticGroup();
+    this.crackedYellowBlocks = this.physics.add.staticGroup();
+    
     this.shrinkBlocks = this.physics.add.staticGroup();
     this.expandedBlocks = this.physics.add.staticGroup();
     this.gunBlocks = this.physics.add.staticGroup();
@@ -316,12 +377,28 @@ export class GameScene extends Phaser.Scene {
 
   //Adds the blocks from the Json objects based upon the lvl number
   loadLevel(lvl){
+    
     this.blueBlocks.clear(true,true);
     this.crackedBlocks.clear(true,true);
+
+    this.limeBlocks.clear(true,true);
+    this.crackedLimeBlocks.clear(true,true);
+    this.purpleBlocks.clear(true,true),
+    this.crackedPurpleBlocks.clear(true,true);
+    this.orangeBlocks.clear(true,true);
+    this.crackedOrangeBlocks.clear(true,true);
+    this.lightOrangeBlocks.clear(true,true);
+    this.crackedLightOrangeBlocks.clear(true,true);
+    this.ligthBlueBlocks.clear(true,true);
+    this.crackedLightBlueBlocks.clear(true,true);
+    this.yellowBlocks.clear(true,true);
+    this.crackedYellowBlocks.clear(true,true);
+
     this.shrinkBlocks.clear(true,true);
     this.multiBlocks.clear(true,true);
     this.gunBlocks.clear(true,true);
     this.expandedBlocks.clear(true,true);
+    
 
     //load the cracked blocks for the level
     let blueCrackedList = this.level_Json[lvl-1]['crackedBlocks'];
@@ -337,6 +414,113 @@ export class GameScene extends Phaser.Scene {
       let y = parseInt(blueList[i].split(',')[1]);
       this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
     }
+
+    //load crackedLimeBlocks
+    let crackedLimeList = this.level_Json[lvl-1]['limeBlocks'];
+    for(let i = 0 ; i < crackedLimeList.length ; i++){
+      let x = parseInt(crackedLimeList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+      let y = parseInt(crackedLimeList[i].split(',')[1]);
+      this.crackedLimeBlocks.create(x,y,'crackedLimeBlock').setScale(SCALED).refreshBody();
+    }
+
+    //load lime blocks for the level
+    let limeList = this.level_Json[lvl-1]['limeBlocks'];
+    for(let i = 0 ; i < limeList.length ; i++){
+      let x = parseInt(limeList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+      let y = parseInt(limeList[i].split(',')[1]);
+      this.limeBlocks.create(x,y,'limeBlock').setScale(SCALED).refreshBody();
+    }
+
+    //load crackedLimeBlocks
+    let crackedPurpleList = this.level_Json[lvl-1]['crackedPurpleBlocks'];
+    for(let i = 0 ; i < crackedPurpleList.length ; i++){
+      let x = parseInt(crackedPurpleList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+      let y = parseInt(crackedPurpleList[i].split(',')[1]);
+      this.crackedPurpleBlocks.create(x,y,'crackedPurpleBlock').setScale(SCALED).refreshBody();
+    }
+
+    //load lime blocks for the level
+    let purpleList = this.level_Json[lvl-1]['purpleBlocks'];
+    for(let i = 0 ; i < purpleList.length ; i++){
+      let x = parseInt(purpleList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+      let y = parseInt(purpleList[i].split(',')[1]);
+      this.purpleBlocks.create(x,y,'purpleBlock').setScale(SCALED).refreshBody();
+    }
+
+
+
+
+
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
+    // //load blue blocks for the level
+    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
+    // for(let i = 0 ; i < blueList.length ; i++){
+    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+    //   let y = parseInt(blueList[i].split(',')[1]);
+    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
+    // }
   }
 
   //call back method for collider of ball on paddle
@@ -408,6 +592,9 @@ export class GameScene extends Phaser.Scene {
   isWon(){
     return this.blueBlocks.countActive() === 0 &&
            this.crackedBlocks.countActive() === 0 &&
+           this.limeBlocks.countActive() === 0 &&
+           this.crackedLimeBlocks.countActive() === 0 &&
+           this.crackedPurpleBlocks.countActive() === 0 &&
            this.expandedBlocks.countActive() === 0 &&
            this.shrinkBlocks.countActive() === 0 &&
            this.gunBlocks.countActive() === 0 &&
@@ -418,6 +605,10 @@ export class GameScene extends Phaser.Scene {
   levelWon(){
     return this.blueBlocks.countActive() === 0 &&
     this.crackedBlocks.countActive() === 0 &&
+    this.limeBlocks.countActive() === 0 &&
+    this.purpleBlocks.countActive() === 0 &&
+    this.crackedPurpleBlocks.countActive() === 0 &&
+    this.crackedLimeBlocks.countActive() === 0 &&
     this.expandedBlocks.countActive() === 0 &&
     this.shrinkBlocks.countActive() === 0 &&
     this.gunBlocks.countActive() === 0 &&

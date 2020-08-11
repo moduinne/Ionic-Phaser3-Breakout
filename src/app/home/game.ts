@@ -1,14 +1,7 @@
 import * as Phaser from 'phaser';
-//OPPO W AND H INFO
-//W = 360 (720) paddle starts at 337, 1067
-//H = 654 (1308)
-//GLOBAL CONSTANTS
 const SCALED_CORRECTION = 1.75;
 const SCALED = 0.20 * SCALED_CORRECTION;
 const BLOCK_X_CORRECTION = 60;
-// const BLOCK_H = 100;
-// const BLOCK_NUM = 3;
-// const BLOCK_START_X = (window.innerWidth/2) + 25;//<-helps keep aligned in OPPO phone
 const START_X = (window.innerWidth/2) + 150;
 const PAD_START_Y = window.innerHeight +400;
 const BALL_START_Y = window.innerHeight + 300;
@@ -35,12 +28,6 @@ export class GameScene extends Phaser.Scene {
   private crackedLightBlueBlocks: Phaser.Physics.Arcade.StaticGroup;
   private yellowBlocks: Phaser.Physics.Arcade.StaticGroup;
   private crackedYellowBlocks: Phaser.Physics.Arcade.StaticGroup;
-  private greenBlocks: Phaser.Physics.Arcade.StaticGroup;
-  private crackedGreenBlocks: Phaser.Physics.Arcade.StaticGroup;
-  private greyBlocks: Phaser.Physics.Arcade.StaticGroup;
-  private crackedGreyBlocks: Phaser.Physics.Arcade.StaticGroup;
-  private brownBlocks: Phaser.Physics.Arcade.StaticGroup;
-  private crackedBrownBlocks: Phaser.Physics.Arcade.StaticGroup;
   
   //special block types
   private expandedBlocks: Phaser.Physics.Arcade.StaticGroup;
@@ -99,7 +86,6 @@ export class GameScene extends Phaser.Scene {
     //cracked blue block image
     this.load.image('crackedBlue','02-Breakout-Tiles.png');
 
-
     this.load.image('limeBlock', '03-Breakout-Tiles.png' );
     this.load.image('crackedLimeBlock', '04-Breakout-Tiles.png');
     this.load.image('purpleBlock', '05-Breakout-Tiles.png');
@@ -114,11 +100,9 @@ export class GameScene extends Phaser.Scene {
     this.load.image('crackedYellowBlock', '14-Breakout-Tiles.png');
 
     //ball image
-    //this.load.image('ball','bomb.png');
     this.load.image('ball','58-Breakout-Tiles.png');
     //paddle image
-    //this.load.image('paddle','49-Breakout-Tiles.png');
-    this.load.image('paddle','56-Breakout-Tiles.png');
+    this.load.image('paddle','50-Breakout-Tiles.png');
     //audio
     this.load.setPath('assets/audio/');
     this.load.audio('ballCrackBrickSound', 
@@ -127,7 +111,7 @@ export class GameScene extends Phaser.Scene {
             'zapsplat_impact_rock_small_hit_solid_ground_001_11178.mp3');
     this.load.audio('ballHitPaddleSound',
             'tom_chapman_impact_stone_on_frozen_lake_ice_thrown_skim_contact_microphone_002.mp3');
-    
+    //json path for levels
     this.load.setPath('assets/Levels/');
     this.load.json('lvlsJson', 'lvls.json'); 
   }
@@ -202,7 +186,6 @@ export class GameScene extends Phaser.Scene {
 
   //call back method for while dragging touch on screen is happening
   doDrag(pointer){ 
-    //this.dragObj.x = pointer.x;
     this.paddle.x = pointer.x;
   }
 
@@ -260,7 +243,7 @@ export class GameScene extends Phaser.Scene {
       }
     );
     this.openingText = this.add.text(this.physics.world.bounds.width / 2,
-      this.physics.world.bounds.height / 2,
+      (this.physics.world.bounds.height / 2) + 200 ,
       'Tap To Start',
       {
         fontFamily: 'Monaco, Courier, monospace',
@@ -446,81 +429,6 @@ export class GameScene extends Phaser.Scene {
       let y = parseInt(purpleList[i].split(',')[1]);
       this.purpleBlocks.create(x,y,'purpleBlock').setScale(SCALED).refreshBody();
     }
-
-
-
-
-
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
-    // //load blue blocks for the level
-    // let blueList = this.level_Json[lvl-1]['blueBlocks'];
-    // for(let i = 0 ; i < blueList.length ; i++){
-    //   let x = parseInt(blueList[i].split(',')[0]) + BLOCK_X_CORRECTION;
-    //   let y = parseInt(blueList[i].split(',')[1]);
-    //   this.blueBlocks.create(x,y,'blueBlock').setScale(SCALED).refreshBody();
-    // }
   }
 
   //call back method for collider of ball on paddle

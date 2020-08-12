@@ -58,6 +58,7 @@ export class GameScene extends Phaser.Scene {
   public ball_crack_brick_sound;
   public ball_kill_brick_sound;
   public ball_hit_paddle_sound;
+  public shrink_paddle_sound;
 
   public restartButton;
   public nextLevelButton;
@@ -79,13 +80,11 @@ export class GameScene extends Phaser.Scene {
 
     this.load.setPath('assets/imgs/');
     this.load.image('background', 'galaxy.png');
-    //set path for all 
+    //set path for all breakout images
     this.load.setPath('assets/imgs/Breakout_TileSet_Free/PNG/');
-    //blue block image
+    //load all normal block images
     this.load.image('blueBlock','01-Breakout-Tiles.png');
-    //cracked blue block image
     this.load.image('crackedBlue','02-Breakout-Tiles.png');
-
     this.load.image('limeBlock', '03-Breakout-Tiles.png' );
     this.load.image('crackedLimeBlock', '04-Breakout-Tiles.png');
     this.load.image('purpleBlock', '05-Breakout-Tiles.png');
@@ -98,11 +97,14 @@ export class GameScene extends Phaser.Scene {
     this.load.image('crackedLightBlueBlock', '12-Breakout-Tiles.png');
     this.load.image('yellowBlock', '13-Breakout-Tiles.png');
     this.load.image('crackedYellowBlock', '14-Breakout-Tiles.png');
-
+    //load shrink block image
+    this.load.image('shrinkBlock', '46-Breakout-Tiles.png'); 
     //ball image
     this.load.image('ball','58-Breakout-Tiles.png');
     //paddle image
     this.load.image('paddle','50-Breakout-Tiles.png');
+    //shrunken paddle image
+    this.load.image('shrunkPaddle','57-Breakout-Tiles.png');
     //audio
     this.load.setPath('assets/audio/');
     this.load.audio('ballCrackBrickSound', 
@@ -111,6 +113,8 @@ export class GameScene extends Phaser.Scene {
             'zapsplat_impact_rock_small_hit_solid_ground_001_11178.mp3');
     this.load.audio('ballHitPaddleSound',
             'tom_chapman_impact_stone_on_frozen_lake_ice_thrown_skim_contact_microphone_002.mp3');
+    this.load.audio('shrinkSound',
+            'zapsplat_human_fart_wet_weak_51585.mp3');
     //json path for levels
     this.load.setPath('assets/Levels/');
     this.load.json('lvlsJson', 'lvls.json'); 
@@ -211,6 +215,7 @@ export class GameScene extends Phaser.Scene {
     this.ball_crack_brick_sound = this.sound.add('ballCrackBrickSound');
     this.ball_kill_brick_sound = this.sound.add('ballKillBrickSound');
     this.ball_hit_paddle_sound = this.sound.add('ballHitPaddleSound');
+    this.shrink_paddle_sound = this.sound.add('shrinkSound');
   }
 
   //wrapper method for the Text objects of the game
@@ -227,18 +232,18 @@ export class GameScene extends Phaser.Scene {
     );
     this.gameOverText.setOrigin(0.5);
     this.gameOverText.setVisible(false);
-    this.livesText = this.add.text(this.physics.world.bounds.width - 200 ,50,
+    this.livesText = this.add.text(this.physics.world.bounds.width - 250 ,50,
       "Lives: " + this.lives,
       {
         fontFamily: 'Monaco, Courier, monospace',
-        fontSize: '30px',
+        fontSize: '40px',
         fill: '#fff'
       }
     );
     this.scoreText = this.add.text(20,50,"Score: " + this.score,
       {
         fontFamily: 'Monaco, Courier, monospace',
-        fontSize: '30px',
+        fontSize: '40px',
         fill: '#fff'
       }
     );
@@ -313,6 +318,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.balls, this.crackedLimeBlocks, this.hitCrackedBlueBlock, null, this);
     this.physics.add.collider(this.balls,this.purpleBlocks,this.hitSolidBlueBlock,null,this);
     this.physics.add.collider(this.balls,this.crackedPurpleBlocks,this.hitCrackedBlueBlock,null,this);
+    this.physics.add.collider(this.balls, this.shrinkBlocks, this.hitShrinkBlock,null,this);
     this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
   }
 
@@ -429,6 +435,14 @@ export class GameScene extends Phaser.Scene {
       let y = parseInt(purpleList[i].split(',')[1]);
       this.purpleBlocks.create(x,y,'purpleBlock').setScale(SCALED).refreshBody();
     }
+
+    //load shrink blocks for the level
+    let shrinkList = this.level_Json[lvl-1]['shrinkBlocks'];
+    for(let i = 0 ; i < shrinkList.length ; i++){
+      let x = parseInt(shrinkList[i].split(',')[0]) + BLOCK_X_CORRECTION;
+      let y = parseInt(shrinkList[i].split(',')[1]);
+      this.shrinkBlocks.create(x,y,'shrinkBlock').setScale(SCALED).refreshBody();
+    }
   }
 
   //call back method for collider of ball on paddle
@@ -483,6 +497,28 @@ export class GameScene extends Phaser.Scene {
         ball.body.setVelocityX(-150);
       }
     }
+  }
+
+  hitShrinkBlock(ball, block) {
+    block.disableBody(true,true);
+    let newX = this.paddle.body.x;
+    let newY = this.paddle.body.y;
+    this.paddle.disableBody(true, true);
+    this.paddle = this.physics.add.sprite(newX, newY, 'shrunkPaddle').setScale((SCALED-0.05) * 2/1.75).refreshBody();
+    this.physics.add.collider(this.paddle, this.balls, this.hitPlayer, null, this);
+    this.paddle.setImmovable(true);
+    this.paddle.body.setMass(600);
+    this.paddle.setCollideWorldBounds(true);
+    this.paddle.setInteractive();
+    if (ball.body.velocity.x === 0) {
+      let randNum = Math.random();
+      if (randNum >= 0.5) {
+        ball.body.setVelocityX(150);
+      } else {
+        ball.body.setVelocityX(-150);
+      }
+    }
+    this.shrink_paddle_sound.play();
   }
 
   //returns true iff the ball has left the world
